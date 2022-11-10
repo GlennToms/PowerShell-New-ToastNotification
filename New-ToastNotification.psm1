@@ -16,13 +16,13 @@ function New-ToastNotification {
         Specifies the text of the Toast notification 
         
         .EXAMPLE
-        PS> Show-ToastNotification -ApplicationTitle "PomodoroTimer" -ToastBody "Deep work ended"
+        PS> New-ToastNotification -ApplicationTitle "PomodoroTimer" -ToastBody "Deep work ended"
         
         .EXAMPLE
-        PS> "This is body text" | Show-ToastNotification
+        PS> "This is body text" | New-ToastNotification
 
         .LINK
-        https://github.com/GlennToms/Powershell-Pomodoro-Timer
+        https://github.com/GlennToms/PowerShell-New-ToastNotification
         
         .LINK
         https://den.dev/blog/powershell-windows-notification/
