@@ -3,10 +3,11 @@
 
 
 ## .SYNOPSIS
-Creates custom Windows Toast notifications with titles and text
+Creates custom Toast notifications with titles and text
 
 ## .DESCRIPTION
 Creates custom Windows Toast notifications with titles and text
+or Unix Toast notification with notify-send (body only)
 
 ## .PARAMETER ApplicationTitle
 Specifies the title of the application that created the Toast notification

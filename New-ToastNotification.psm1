@@ -1,10 +1,11 @@
 function New-ToastNotification {
     <#
         .SYNOPSIS
-        Creates custom Windows Toast notifications with titles and text
+        Creates custom Toast notifications with titles and text
         
         .DESCRIPTION
         Creates custom Windows Toast notifications with titles and text
+        or Unix Toast notification with notify-send (body only)
 
         .PARAMETER ApplicationTitle
         Specifies the title of the application that created the Toast notification
@@ -40,27 +41,31 @@ function New-ToastNotification {
         [string]
         $ToastTitle,
         [string]
-        [parameter(ValueFromPipeline, Mandatory = $true)]
+        [parameter(Position = 1, ValueFromPipeline, Mandatory = $true)]
         $ToastBody
     )
+    if ([environment]::OSVersion.Platform -eq 'Unix') {
+        Invoke-Command -ScriptBlock { notify-send $ToastBody }
+    }
+    else {
+        [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
+        $Template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
 
-    [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null
-    $Template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
-
-    $RawXml = [xml] $Template.GetXml()
+        $RawXml = [xml] $Template.GetXml()
     ($RawXml.toast.visual.binding.text | Where-Object { $_.id -eq "1" }).AppendChild($RawXml.CreateTextNode($ToastTitle)) > $null
     ($RawXml.toast.visual.binding.text | Where-Object { $_.id -eq "2" }).AppendChild($RawXml.CreateTextNode($ToastBody)) > $null
 
-    $SerializedXml = New-Object Windows.Data.Xml.Dom.XmlDocument
-    $SerializedXml.LoadXml($RawXml.OuterXml)
+        $SerializedXml = New-Object Windows.Data.Xml.Dom.XmlDocument
+        $SerializedXml.LoadXml($RawXml.OuterXml)
 
-    $Toast = [Windows.UI.Notifications.ToastNotification]::new($SerializedXml)
-    $Toast.Tag = $ApplicationTitle
-    $Toast.Group = $ApplicationTitle
-    $Toast.ExpirationTime = [DateTimeOffset]::Now.AddMinutes(1)
+        $Toast = [Windows.UI.Notifications.ToastNotification]::new($SerializedXml)
+        $Toast.Tag = $ApplicationTitle
+        $Toast.Group = $ApplicationTitle
+        $Toast.ExpirationTime = [DateTimeOffset]::Now.AddMinutes(1)
 
-    $Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($ApplicationTitle)
-    $Notifier.Show($Toast);
+        $Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($ApplicationTitle)
+        $Notifier.Show($Toast);
+    }
 }
 
 Export-ModuleMember New-ToastNotification
